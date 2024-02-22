@@ -1,0 +1,59 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gfrancis <gfrancis@student.42lisboa.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/02/17 14:50:19 by gfrancis          #+#    #+#             */
+/*   Updated: 2024/02/17 15:32:27 by gfrancis         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "minitalk.h"
+
+void	ft_putnbr(long nbr)
+{
+	char	temp;
+
+	if (nbr / 10 > 0)
+		ft_putnbr(nbr / 10);
+	temp = nbr % 10 + '0';
+	write(1, &temp, 1);
+}
+
+void	sig_handle(int signal)
+{
+	static int	i;
+	static int	n;
+	int			nb;
+
+	if (signal == SIGUSR1)
+		nb = 0;
+	else
+		nb = 1;
+	n = (n << 1) + nb;
+	i++;
+	if (i == 8)
+	{
+		write(1, &n, 1);
+		i = 0;
+		n = 0;
+	}
+}
+
+int	main(void)
+{
+	struct sigaction	sigact;
+
+	sigact.sa_handler = &sig_handle;
+	sigact.sa_flags = SA_RESTART;
+	sigaction(SIGUSR1, &sigact, 0);
+	sigaction(SIGUSR2, &sigact, 0);
+	write(1, "The server is up and running. It's PID is: ", 43);
+	ft_putnbr(getpid());
+	write(1, "\n", 1);
+	while (1)
+		usleep(100);
+	return (0);
+}
